@@ -239,6 +239,10 @@ thread_unblock (struct thread *t)
   ASSERT (t->status == THREAD_BLOCKED);
   list_insert_ordered (&ready_list, &(t->elem), priority_less_func, NULL);
   t->status = THREAD_READY;
+  if ((running_thread())->priority < t->priority)
+  {
+    thread_yield();
+  }
   intr_set_level (old_level);
 }
 
@@ -336,6 +340,12 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = new_priority;
+  struct list_elem *tail = list_rbegin (&ready_list);
+  struct thread *t = list_entry (tail, struct thread, elem);
+  if (t->priority > new_priority)
+  {
+    thread_yield();
+  }
 }
 
 /* Returns the current thread's priority. */
