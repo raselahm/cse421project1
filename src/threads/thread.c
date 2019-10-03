@@ -234,15 +234,25 @@ thread_unblock (struct thread *t)
   enum intr_level old_level;
 
   ASSERT (is_thread (t));
+printf("Hello from thread_unblock\n");
+struct list_elem *e;
 
+      
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
   list_insert_ordered (&ready_list, &(t->elem), priority_less_func, NULL);
   t->status = THREAD_READY;
+printf("Running: %s\n", running_thread()->name);
+for (e = list_begin (&ready_list); e != list_end (&ready_list);
+           e = list_next (e))
+        {
+          struct thread *f = list_entry (e, struct thread, elem);
+          printf("%i", f->priority);
+        }
   intr_set_level (old_level);
   if ((running_thread())->priority < t->priority)
   {
-    thread_yield();
+   thread_yield();
   }
 }
 
@@ -307,13 +317,17 @@ thread_yield (void)
 {
   struct thread *cur = thread_current ();
   enum intr_level old_level;
-  
+  printf("In yield\n");
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
+{
+printf("Adding to list\n");
     list_insert_ordered (&ready_list, &(cur->elem), priority_less_func, NULL);
+}
   cur->status = THREAD_READY;
+printf("above schedule");
   schedule ();
   intr_set_level (old_level);
 }
