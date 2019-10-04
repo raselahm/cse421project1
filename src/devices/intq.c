@@ -108,7 +108,9 @@ signal (struct intq *q UNUSED, struct thread **waiter)
 
   if (*waiter != NULL) 
     {
-      thread_unblock (*waiter);
+      struct thread *waiter_copy = *waiter;
       *waiter = NULL;
+      thread_unblock (waiter_copy);
+      
     }
 }
