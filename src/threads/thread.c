@@ -254,11 +254,11 @@ for (e = list_begin (&ready_list); e != list_end (&ready_list);
   {
       if (intr_context ())
       {
-          thread_yield();
+          intr_yield_on_return ();
       }
       else
       {
-          intr_yield_on_return ();
+          thread_yield();
       }
   }
 }
@@ -617,20 +617,6 @@ priority_less_func (const struct list_elem *a, const struct list_elem *b, void *
     struct thread *t2 = list_entry (b, struct thread, elem);
     
     if (t1->priority <= t2->priority)
-    {
-        return true;
-    }
-    
-    return false;
-}
-
-bool
-priority_less_cond (const struct list_elem *cur, const struct list_elem *b, void *aux)
-{
-    struct semaphore_elem *se = list_entry (b, struct semaphore_elem, elem);
-    struct thread *t = list_entry (se->semaphore.waiters.head.next, struct thread, elem);
-    
-    if (((int) aux) <= t->priority)
     {
         return true;
     }

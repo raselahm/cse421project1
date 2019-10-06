@@ -336,3 +336,19 @@ cond_broadcast (struct condition *cond, struct lock *lock)
   while (!list_empty (&cond->waiters))
     cond_signal (cond, lock);
 }
+
+bool
+priority_less_cond (const struct list_elem *cur, const struct list_elem *b, void *aux)
+{
+    struct semaphore_elem *se = list_entry (b, struct semaphore_elem, elem);
+    struct thread *t = list_entry (se->semaphore.waiters.head.next, struct thread, elem);
+    
+    if (((int) aux) <= t->priority)
+    {
+        return true;
+    }
+    
+    return false;
+}
+
+
