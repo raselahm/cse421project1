@@ -147,7 +147,6 @@ bool priority_less_func (const struct list_elem *, const struct list_elem *, voi
 void thread_sleep (int64_t);
 void check_sleeping_threads (int64_t);
 bool wake_less_func (const struct list_elem *, const struct list_elem *, void *);
->>>>>>> matt_timer
 
 #endif /* threads/thread.h */
 
