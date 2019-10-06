@@ -250,9 +250,16 @@ for (e = list_begin (&ready_list); e != list_end (&ready_list);
           //printf("%i", f->priority);
         }
   intr_set_level (old_level);
-  if ((running_thread())->priority < t->priority)
+  if ((thread_current())->priority < t->priority)
   {
-   thread_yield();
+      if (intr_context ())
+      {
+          thread_yield();
+      }
+      else
+      {
+          intr_yield_on_return ();
+      }
   }
 }
 
@@ -609,7 +616,21 @@ priority_less_func (const struct list_elem *a, const struct list_elem *b, void *
     struct thread *t1 = list_entry (a, struct thread, elem);
     struct thread *t2 = list_entry (b, struct thread, elem);
     
-    if (t1->priority < t2->priority)
+    if (t1->priority <= t2->priority)
+    {
+        return true;
+    }
+    
+    return false;
+}
+
+bool
+priority_less_cond (const struct list_elem *cur, const struct list_elem *b, void *aux)
+{
+    struct semaphore_elem *se = list_entry (b, struct semaphore_elem, elem);
+    struct thread *t = list_entry (se->semaphore.waiters.head.next, struct thread, elem);
+    
+    if (((int) aux) <= t->priority)
     {
         return true;
     }
