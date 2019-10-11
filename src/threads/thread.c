@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/fixed_point.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -39,6 +40,12 @@ static struct thread *initial_thread;
 
 /* Lock used by allocate_tid(). */
 static struct lock tid_lock;
+
+// Multifeedback Queue Scheduler Ready List
+static struct list mlfqs_ready_list[PRI_MAX + 1];
+
+// Load Average (as fixed point)
+static int load_average;
 
 /* Stack frame for kernel_thread(). */
 struct kernel_thread_frame 
@@ -96,12 +103,25 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
   list_init (&sleeping_list);
+  
+  if (thread_mlfqs)
+  {
+    for (int i = 0; i <= PRI_MAX; i++)
+    {
+        list_init(&(mlfqs_ready_list[i]));
+    }
+    
+    load_average = 0;
+  }
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+  initial_thread->recent_cpu = 0;
+  initial_thread->nice = 0;
+  
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -381,8 +401,7 @@ thread_set_nice (int nice UNUSED)
 int
 thread_get_nice (void) 
 {
-  /* Not yet implemented. */
-  return 0;
+  return thread_current ()->nice;
 }
 
 /* Returns 100 times the system load average. */
@@ -517,10 +536,29 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void) 
 {
-  if (list_empty (&ready_list))
-    return idle_thread;
-  else
-    return list_entry (list_pop_back (&ready_list), struct thread, elem);
+
+  if (!thread_mlfqs)
+  {
+      if (list_empty (&ready_list))
+      {
+        return idle_thread;
+      }
+      else
+      {
+        return list_entry (list_pop_back (&ready_list), struct thread, elem);
+      }
+  }
+  
+  for (int i = PRI_MAX; i >= 0; i--)
+  {
+    if (!list_empty(&(mlfqs_ready_list[i])))
+    {
+        return list_entry (list_pop_front (&(mlfqs_ready_list[i])), struct thread, mlfqs_elem);
+    }
+  }
+  
+  return idle_thread;
+  
 }
 
 /* Completes a thread switch by activating the new thread's page
