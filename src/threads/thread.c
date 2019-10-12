@@ -119,9 +119,12 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
-  initial_thread->recent_cpu = 0;
-  initial_thread->nice = 0;
-  initial_thread->priority = mlfqs_priority (0, 0);
+  if (thread_mlfqs)
+  {
+      initial_thread->recent_cpu = 0;
+      initial_thread->nice = 0;
+      initial_thread->priority = mlfqs_priority (0, 0);
+  }
   
 }
 
@@ -463,7 +466,7 @@ thread_get_load_avg (void)
     int l = load_average;
     intr_set_level (old_level);
     
-    return TO_INT_NEAREST_POS(100 * t);
+    return TO_INT_NEAREST_POS(100 * l);
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */

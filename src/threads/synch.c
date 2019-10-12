@@ -126,7 +126,7 @@ sema_up (struct semaphore *sema)
       if (thread_mlfqs)
       {
           struct thread *t = list_entry (list_max (&sema->waiters, priority_less_func2, NULL), struct thread, elem);
-          list_remove (t->elem);
+          list_remove (&(t->elem));
           thread_unblock (t);
       }
       else
@@ -349,9 +349,9 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
       {
           enum intr_level old_level = intr_disable ();
           struct semaphore_elem *s = list_entry (list_max (&cond->waiters, priority_less_cond2, NULL), struct semaphore_elem, elem);
-          list_remove (s->elem);
+          list_remove (&(s->elem));
           intr_set_level (old_level);
-          sema_up (&(s->semaphore))
+          sema_up (&(s->semaphore));
       }
       else
       {
@@ -397,7 +397,7 @@ priority_less_cond2 (const struct list_elem *a, const struct list_elem *b, void 
     struct semaphore_elem *se1 = list_entry (a, struct semaphore_elem, elem);
     struct semaphore_elem *se2 = list_entry (b, struct semaphore_elem, elem);
     
-    if (se1->t->prioirty < se2->t->priority)
+    if (se1->t->priority < se2->t->priority)
     {
         return true;
     }
