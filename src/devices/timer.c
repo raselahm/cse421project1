@@ -180,6 +180,22 @@ timer_interrupt (struct intr_frame *args UNUSED)
   ticks++;
   thread_tick ();
   check_sleeping_threads (ticks);
+  
+  // update mlfqs data
+  if (thread_mlfqs)
+  {
+      
+      if ((ticks % TIMER_FREQ) == 0)
+      {
+          mlfqs_loadavg ();
+          thread_foreach (update_mlfqs_recent, NULL);
+      }
+      
+      if ((ticks % 4) == 0)
+      {
+          thread_foreach (update_mlfqs_priority, NULL);
+      }
+  }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

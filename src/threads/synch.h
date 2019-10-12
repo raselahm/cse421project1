@@ -42,6 +42,7 @@ void cond_signal (struct condition *, struct lock *);
 void cond_broadcast (struct condition *, struct lock *);
 
 bool priority_less_cond (const struct list_elem *, const struct list_elem *, void *);
+bool priority_less_cond2 (const struct list_elem *, const struct list_elem *, void *);
 
 /* Optimization barrier.
 
