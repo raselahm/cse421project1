@@ -156,6 +156,7 @@ int mlfqs_recentcpu (int, int);
 void mlfqs_loadavg (void);
 void update_mlfqs_priority (struct thread *, void *);
 void update_mlfqs_recent (struct thread *, void *);
+void update_mlfqs_list (void);
 
 
 #endif /* threads/thread.h */

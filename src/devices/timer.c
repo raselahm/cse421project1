@@ -194,6 +194,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
       if ((ticks % 4) == 0)
       {
           thread_foreach (update_mlfqs_priority, NULL);
+          update_mlfqs_list ();
       }
   }
 }

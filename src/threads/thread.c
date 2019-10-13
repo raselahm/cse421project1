@@ -631,7 +631,9 @@ next_thread_to_run (void)
   {
     if (!list_empty (&(mlfqs_ready_list[i])))
     {
-        return list_entry (list_pop_front (&(mlfqs_ready_list[i])), struct thread, mlfqs_elem);
+        struct thread *t = list_entry (list_pop_front (&(mlfqs_ready_list[i])), struct thread, mlfqs_elem);
+        list_remove (&(t->elem));
+        return t;
     }
   }
   
@@ -872,6 +874,47 @@ void
 update_mlfqs_recent (struct thread *t, void *aux)
 {
     t->recent_cpu = mlfqs_recentcpu (t->recent_cpu, t->nice);
+}
+
+void
+update_mlfqs_list (void)
+{
+    for (int i = PRI_MAX; i >= 0; i--)
+    {
+        // iterate through the list and move the appropriate threads
+        struct list_elem *e;
+
+        for (e = list_begin (&(mlfqs_ready_list[i])); e != list_end (&(mlfqs_ready_list[i])); e = list_next (e))
+        {
+            struct thread *t = list_entry (e, struct thread, mlfqs_elem);
+            
+            if (t->priority != i)
+            {
+                e = list_remove (e);
+                e = e->prev;
+                
+                list_push_back (&(mlfqs_ready_list[t->priority]), &(t->mlfqs_elem));
+                
+            }
+            
+        }
+    }
+    
+    // now check for preemption
+    int highest_priority = PRI_MIN - 1;
+    for (int i = PRI_MAX; i >= 0; i--)
+    {
+        if (!list_empty (&(mlfqs_ready_list[i])))
+        {
+            highest_priority = i;
+            break;
+        }
+    }
+
+    if ((thread_current ())->priority < highest_priority)
+    {
+        intr_yield_on_return ();
+    }
 }
 
 
