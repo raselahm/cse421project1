@@ -160,6 +160,7 @@ void mlfqs_loadavg (void);
 void update_mlfqs_priority (struct thread *, void *);
 void update_mlfqs_recent (struct thread *, void *);
 void update_mlfqs_list (void);
+void donate_helper (struct thread *);
 
 
 #endif /* threads/thread.h */

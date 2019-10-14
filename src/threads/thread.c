@@ -939,6 +939,12 @@ update_mlfqs_list (void)
     }
 }
 
+void
+donate_helper (struct thread *t)
+{
+    list_insert_ordered (&ready_list, &(t->elem), priority_less_func2, NULL);
+}
+
 
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */

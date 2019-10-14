@@ -82,14 +82,14 @@ sema_down (struct semaphore *sema)
           {
               cur_lock->holder->priority = donate_pri;
               cur_lock->holder->donated = true;
-              cur_lock->donation_recieved = true;
+              cur_lock->donation_received = true;
               
               if (!(cur_lock->holder->waiting_lock))
               {
                   if (cur_lock->holder->status == THREAD_READY)
                   {
                       list_remove (&(cur_lock->holder->elem));
-                      list_insert_ordered (&ready_list, &(cur_lock->holder->elem), priority_less_func2, NULL);
+                      donate_helper (cur_lock->holder);
                   }
               }
               cur_lock = cur_lock->holder->waiting_lock;

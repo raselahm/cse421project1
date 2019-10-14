@@ -23,7 +23,7 @@ struct lock
   {
     struct thread *holder;      /* Thread holding lock (for debugging). */
     struct semaphore semaphore; /* Binary semaphore controlling access. */
-    bool donation_recieved;     // Has this lock received a donation
+    bool donation_received;     // Has this lock received a donation
   };
 
 void lock_init (struct lock *);
