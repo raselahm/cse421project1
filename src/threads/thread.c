@@ -400,14 +400,33 @@ thread_set_priority (int new_priority)
     
   if (!thread_mlfqs)
   {
-      thread_current ()->priority = new_priority;
+      struct thread *th = thread_current ();
+      
+      if (th->donated)
+      {
+          if (new_priority > th->priority)
+          {
+              th->priority = new_priority;
+              th->base_priority = new_priority;  
+          }
+          else
+          {
+              th->base_priority = new_priority;
+          }
+      }
+      else
+      {
+          th->priority = new_priority;
+          th->base_priority = new_priority;
+      }
+      
       if (!list_empty (&ready_list))
       {
           struct list_elem *tail = list_rbegin (&ready_list);
           struct thread *t = list_entry (tail, struct thread, elem);
           if (t->priority > new_priority)
           {
-            thread_yield();
+              thread_yield();
           }
       }
   }
@@ -586,6 +605,9 @@ init_thread (struct thread *t, const char *name, int priority)
   }
 
   t->priority = priority;
+  t->base_priority = priority;
+  t->waiting_lock = NULL;
+  t->donated = false;
   
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);

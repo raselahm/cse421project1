@@ -89,6 +89,9 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
+    int base_priority;                  // Priority of Thread (unaffected by donation)
+    struct lock *waiting_lock;          // Lock the thread is waiting for (if any)
+    bool donated;                   `   // Is this thread currently using a donated priority
     int recent_cpu;                     // Thread's recent CPU value (as fixed point)
     int nice;                           // Thread's nice value (-20 to 20)
     int64_t wakeup_time;                // Time thread should wake up from sleeping.
