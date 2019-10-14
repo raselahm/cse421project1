@@ -199,7 +199,7 @@ lock_init (struct lock *lock)
   lock->holder = NULL;
   sema_init (&lock->semaphore, 1);
   lock->semaphore.associated_lock = lock;
-  donation_recieved = false;
+  lock->donation_recieved = false;
 }
 
 /* Acquires LOCK, sleeping until it becomes available if
